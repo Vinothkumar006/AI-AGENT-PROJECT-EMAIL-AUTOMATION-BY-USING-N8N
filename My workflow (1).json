@@ -1,0 +1,163 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nI'm your Email Assistant. I'll help you create detailed, professional emails.\n\nJust tell me:\n- Who you're writing to\n- What the email is about\n- Any key points you want to include\n\nI'll craft a comprehensive, well-structured email for you!",
+        "availableInChat": true,
+        "agentName": "Email Assistant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        912,
+        144
+      ],
+      "id": "780a3183-2369-4ba8-be5c-20b696ebde36",
+      "name": "When chat message received",
+      "webhookId": "0873f2eb-0837-4587-8c0c-6839a2835579"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a professional email writing assistant that creates detailed, comprehensive emails.\n\nWhen creating emails:\n1. Write DETAILED content with multiple paragraphs (minimum 3-4 paragraphs)\n2. Expand on key points with specific details and context\n3. Use professional language and proper business email structure\n4. Include relevant background information and explanations\n5. Add appropriate transitions between ideas\n6. Make the content substantive and informative\n\nFormat emails with proper line breaks:\n- Put the subject line on the first line\n- Start the email content on a new line after the subject\n- Add line breaks between paragraphs for readability\n- Include detailed paragraphs (3-5 sentences each)\n- Put closing greetings on a new line\n- Put the signature on a new line after the closing greeting\n\nExample format:\nSubject: [Detailed Subject Here]\n\n[Opening paragraph with context - 3-4 sentences]\n\n[Main content paragraph 1 with details - 4-5 sentences]\n\n[Main content paragraph 2 with additional information - 4-5 sentences]\n\n[Closing paragraph with next steps or summary - 2-3 sentences]\n\n[Closing greeting]\n[Signature]\n\nMake every email substantial and professional with rich content."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1120,
+        144
+      ],
+      "id": "f70699f2-b5bb-4648-a179-ad75e3b4e79e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "id"
+        },
+        "builtInTools": {
+          "webSearch": {
+            "searchContextSize": "medium"
+          }
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        352
+      ],
+      "id": "efb63132-2ddf-4bad-b119-6140f6d11d67",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "TFbL9MiYb1xY2lz1",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        352
+      ],
+      "id": "0d0d92fd-5122-4eb8-88bd-f12bd7d7d790",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "vinothchinnasami@gmail.com,vinothkumarc7373@gmail.com",
+        "subject": "={{ $('AI Agent').item.json.output.split('\\n').find(line => line.trim() && !line.startsWith('Subject:')) }}",
+        "message": "={{ $('AI Agent').item.json.output.split('\\n').slice(1).join('\\n').replace(/\\n/g, '<br>\\n') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        144
+      ],
+      "id": "2a316207-8973-4d8b-8bdc-c25999667774",
+      "name": "Send a message",
+      "webhookId": "5e9e235a-101d-461e-83d4-6f9c76c56bca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "49qvLJ56bjoN8IYa",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9432b3d0-8ff8-4eae-a6c4-4cd7ea569266",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2dcb96b25c6f79f4df029e4ce7edd7af731eee5deba5eb90524e5f0340559f4b"
+  },
+  "id": "1QtbESoqKyfueoWcS045M",
+  "tags": []
+}
